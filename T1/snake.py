@@ -58,14 +58,17 @@ def main():
     pg.init()
     screen = pg.display.set_mode((400, 300))
     clock = pg.time.Clock()
+    running= True
 
-    while True:
+    while running:
         # au plus 1 image par seconde
         clock.tick(1)
 
         # 1. les événements : il faut les lire, sinon la fenêtre ne répond pas
         for event in pg.event.get():
-            pass
+            if event.type== pg.QUIT or (event.type== pg.KEYDOWN and event.key== pg.K_q) :
+                running= False
+            
 
         # 2. l'état (rien pour l'instant)
 
