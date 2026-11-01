@@ -60,11 +60,19 @@ class Boid(arcade.Sprite):
         self.angle += self.turning*TURN_SPEED* delta_time 
         noise=random.uniform(-NOISE,NOISE)
         self.angle +=noise
+        if len(self.neighbours(self.others))>0 :
+            self.alpha=123
+        else : self.alpha=255
 
     def neighbours(self, others, radius=RADIUS):
         """Les objets de `others` à moins de `radius` pixels, sauf soi-même."""
-        raise NotImplementedError("étape 7")
-
+        proches=[]
+        for elem in self.others :
+            if math.dist(self.position,elem.position)<RADIUS :
+                proches.append(elem)
+        return proches
+            
+             
     def separation(self, others, radius=RADIUS):
         """Le déplacement (dx, dy) qui écarte le boid de ses voisins."""
         raise NotImplementedError("étape 8")
@@ -110,10 +118,20 @@ class MyWindow(arcade.Window):
         self.obstacles= obstacle_grid(GRID)
         self.boids = random_boids(20, others=None)
         self.turning=0
+        self.others=arcade.SpriteList()
+        for elem in self.boids :
+            self.others.append(elem)
+        for elem in self.obstacles :
+            self.others.append(elem)
 
     def on_update(self, delta_time):
-        for boid in self.boids:
+        for i, boid in enumerate(self.boids):
             boid.turning = self.turning
+            boid.others =[]
+            for elem in self.others[:i] :
+                boid.others.append(elem)
+            for elem in self.others[i+1:] :
+                boid.others.append(elem)
         self.boids.update(delta_time)
 
     def on_draw(self):
