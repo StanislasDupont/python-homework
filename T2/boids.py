@@ -58,6 +58,8 @@ class Boid(arcade.Sprite):
         if self.center_y >=HEIGHT or self.center_y <0 :
             self.center_y=self.center_y %HEIGHT  
         self.angle += self.turning*TURN_SPEED* delta_time 
+        noise=random.uniform(-NOISE,NOISE)
+        self.angle +=noise
 
     def neighbours(self, others, radius=RADIUS):
         """Les objets de `others` à moins de `radius` pixels, sauf soi-même."""
@@ -72,7 +74,7 @@ class Obstacle(arcade.Sprite):
     """Un obstacle immobile."""
 
     def __init__(self, x, y):
-        raise NotImplementedError("étape 6")
+        super().__init__(OBSTACLE, center_x=x, center_y=y)
 
 
 def random_boids(n, others=None):
@@ -86,7 +88,14 @@ def random_boids(n, others=None):
 
 def obstacle_grid(n):
     """n × n obstacles régulièrement espacés, au centre de leur carré."""
-    raise NotImplementedError("étape 6")
+    positions=arcade.SpriteList()
+    d=WIDTH/n
+    for i in range (n) :
+        for j in range (n) :
+            new=Obstacle(d/2+i*d,d/2+j*d)
+            positions.append(new)
+    return positions
+    
 
 
 # --- la fenêtre ---------------------------------------------------------------
@@ -98,7 +107,7 @@ class MyWindow(arcade.Window):
         # pixels, avec « Boids » pour titre (super() : on y revient en séance)
         super().__init__(WIDTH, HEIGHT, "Boids")
         self.background_color = BACKGROUND  # la couleur que self.clear() étale
-
+        self.obstacles= obstacle_grid(GRID)
         self.boids = random_boids(20, others=None)
         self.turning=0
 
@@ -109,6 +118,7 @@ class MyWindow(arcade.Window):
 
     def on_draw(self):
         self.clear()
+        self.obstacles.draw()
         self.boids.draw()
      
     def on_key_press(self, symbol, modifiers):
