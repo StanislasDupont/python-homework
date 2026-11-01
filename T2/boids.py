@@ -43,9 +43,10 @@ RADIUS = 30  # rayon de détection des voisins, en pixels (étapes 7 et 8)
 class Boid(arcade.Sprite):
     """Un oiseau : une flèche qui avance dans la direction où elle pointe."""
 
-    def __init__(self, x, y, angle, speed=SPEED, others=None):
+    def __init__(self, x, y, angle, speed=SPEED, others=None,turning=0):
         super().__init__(ARROW, center_x=x, center_y=y, angle=angle)
         self.speed = speed
+        self.turning=turning
 
     def update(self, delta_time=1 / 60, *args, **kwargs):
         """Appelée par arcade (via la SpriteList) à chaque mise à jour."""
@@ -55,7 +56,8 @@ class Boid(arcade.Sprite):
         if self.center_x >=WIDTH or self.center_x <0 :
             self.center_x=self.center_x %WIDTH
         if self.center_y >=HEIGHT or self.center_y <0 :
-            self.center_y=self.center_y %HEIGHT    
+            self.center_y=self.center_y %HEIGHT  
+        self.angle += self.turning*TURN_SPEED* delta_time 
 
     def neighbours(self, others, radius=RADIUS):
         """Les objets de `others` à moins de `radius` pixels, sauf soi-même."""
@@ -77,7 +79,7 @@ def random_boids(n, others=None):
     """n boids placés et orientés au hasard, qui évitent tous `others`."""
     boids = arcade.SpriteList()
     for i in range (n) :
-        boid = Boid(random.uniform(0, WIDTH), random.uniform(0, HEIGHT), random.uniform(-180, 180),SPEED, others)
+        boid = Boid(random.uniform(0, WIDTH), random.uniform(0, HEIGHT), random.uniform(-180, 180),SPEED, others=others)
         boids.append(boid)
     return boids
 
@@ -98,13 +100,27 @@ class MyWindow(arcade.Window):
         self.background_color = BACKGROUND  # la couleur que self.clear() étale
 
         self.boids = random_boids(20, others=None)
+        self.turning=0
 
     def on_update(self, delta_time):
+        for boid in self.boids:
+            boid.turning = self.turning
         self.boids.update(delta_time)
 
     def on_draw(self):
         self.clear()
         self.boids.draw()
+     
+    def on_key_press(self, symbol, modifiers):
+        if symbol == arcade.key.LEFT :
+            self.turning=-1
+        if symbol == arcade.key.RIGHT :
+            self.turning=1
+       # symbol vaut arcade.key.LEFT, arcade.key.RIGHT, arcade.key.Q…
+
+    def on_key_release(self, symbol, modifiers):
+        if symbol ==arcade.key.LEFT or symbol==arcade.key.RIGHT :
+            self.turning=0
 
 
 def main():
