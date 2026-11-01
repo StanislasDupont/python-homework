@@ -47,6 +47,7 @@ class Boid(arcade.Sprite):
         super().__init__(ARROW, center_x=x, center_y=y, angle=angle)
         self.speed = speed
         self.turning=turning
+        self.others=others
 
     def update(self, delta_time=1 / 60, *args, **kwargs):
         """Appelée par arcade (via la SpriteList) à chaque mise à jour."""
@@ -121,6 +122,8 @@ class MyWindow(arcade.Window):
         # pixels, avec « Boids » pour titre (super() : on y revient en séance)
         super().__init__(WIDTH, HEIGHT, "Boids")
         self.background_color = BACKGROUND  # la couleur que self.clear() étale
+        self.sky= arcade.SpriteList()
+        self.sky.append(arcade.Sprite(path_or_texture=SKY,center_x=WIDTH / 2, center_y=HEIGHT / 2))
         self.obstacles= obstacle_grid(GRID)
         self.boids = random_boids(20, others=None)
         self.turning=0
@@ -142,6 +145,7 @@ class MyWindow(arcade.Window):
 
     def on_draw(self):
         self.clear()
+        self.sky.draw()
         self.obstacles.draw()
         self.boids.draw()
      
