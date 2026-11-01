@@ -51,8 +51,8 @@ class Boid(arcade.Sprite):
     def update(self, delta_time=1 / 60, *args, **kwargs):
         """Appelée par arcade (via la SpriteList) à chaque mise à jour."""
         rad = math.radians(self.angle)
-        self.center_x += self.speed * delta_time * math.cos(rad)
-        self.center_y -= self.speed * delta_time * math.sin(rad)
+        self.center_x += self.speed * delta_time * math.cos(rad)+self.separation( self.neighbours(self.others))[0]
+        self.center_y -= self.speed * delta_time * math.sin(rad)-self.separation(self.neighbours(self.others))[1]
         if self.center_x >=WIDTH or self.center_x <0 :
             self.center_x=self.center_x %WIDTH
         if self.center_y >=HEIGHT or self.center_y <0 :
@@ -67,15 +67,21 @@ class Boid(arcade.Sprite):
     def neighbours(self, others, radius=RADIUS):
         """Les objets de `others` à moins de `radius` pixels, sauf soi-même."""
         proches=[]
-        for elem in self.others :
-            if math.dist(self.position,elem.position)<RADIUS :
+        for elem in others :
+            if math.dist(self.position,elem.position)<radius :
                 proches.append(elem)
         return proches
             
              
     def separation(self, others, radius=RADIUS):
         """Le déplacement (dx, dy) qui écarte le boid de ses voisins."""
-        raise NotImplementedError("étape 8")
+        dx=0
+        dy=0
+        for elem in others :
+            d=math.dist(self.position,elem.position)
+            dx+=(self.position[0]-elem.position[0])/d*(1-(d/radius))/2
+            dy+=(self.position[1]-elem.position[1])/d*(1-(d/radius))/2
+        return dx,dy
 
 
 class Obstacle(arcade.Sprite):
